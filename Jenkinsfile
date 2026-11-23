@@ -8,6 +8,7 @@
 //
 // A pull request (and every branch that does not deploy) builds from the committed fixture and never sees a credential. A build that
 // deploys reads the real export of the backend with the export token; the token exists only in the check containers, never in the image.
+// `esoul-guidelines check` runs by itself with the version recorded in `esoul-guidelines.lock` (stage `Guidelines check`; README, "Guidelines").
 //
 // Replace the example values. Credentials (Jenkins): `scaleway_secret_key`, `komodo_deploy_api_key`, `komodo_deploy_api_secret` and two
 // Secret Text credentials: the export token (= CMS_EXPORT_TOKEN of the backend) and the callback token (= CMS_JENKINS_CALLBACK_TOKEN of
@@ -45,14 +46,6 @@ astroPipeline(
     extraChecks: [
         // The golden export and the committed fixture agree (no backend needed).
         [name: 'Contract', command: 'pnpm run fixture:check'],
-        // The rules rendered by `esoul-guidelines` are current and unedited (README, "Guidelines"). The image of the guidelines has no PHP
-        // project around it; its entrypoint is the command itself, and the step runs `/bin/sh -c <command>`, so the entrypoint is cleared.
-        [
-            name: 'Guidelines',
-            image: 'rg.fr-par.scw.cloud/testing-images/esoul-guidelines:0.3',
-            options: '--entrypoint=',
-            command: 'esoul-guidelines check',
-        ],
     ],
     cms: [
         callbackUrl: 'https://admin.example-project.example.com/cms-api/v1/publishes/{publishId}/status',
