@@ -1,0 +1,53 @@
+{
+    "name": "frontend",
+    "type": "module",
+    "version": "0.1.0",
+    "private": true,
+    "packageManager": "pnpm@12.21.0",
+    "engines": {
+        "node": ">=26"
+    },
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro",
+        "check": "CMS_SOURCE=${CMS_SOURCE:-fixture} astro check && vue-tsc --noEmit",
+        "eslint": "eslint .",
+        "eslint:fix": "eslint . --fix",
+        "format": "prettier . --write",
+        "format:check": "prettier . --check",
+        "test": "vitest run",
+        "test:e2e": "playwright test",
+        "verify": "node scripts/verify-dist.mjs",
+        "cms:pull": "CMS_SOURCE=api astro sync",
+        "contract:sync": "node scripts/sync-contract.mjs && node scripts/build-fixture.mjs",
+        "fixture:build": "node scripts/build-fixture.mjs",
+        "fixture:check": "node scripts/check-contract.mjs && node scripts/check-fixture.mjs"
+    },
+    "dependencies": {
+        "@astrojs/sitemap": "^3.7.4",
+        "@tailwindcss/vite": "^4.3.3",
+        "astro": "^7.3.5",
+        "tailwindcss": "^4.3.3",
+        "@astrojs/vue": "^7.1.0",
+        "vue": "^3.5.0"
+    },
+    "devDependencies": {
+        "@astrojs/check": "^0.9.10",
+        "@eslint/js": "^10.0.1",
+        "@playwright/test": "1.65.1",
+        "@types/node": "^26.6.5",
+        "eslint": "^10.15.0",
+        "eslint-plugin-astro": "^3.2.1",
+        "globals": "^17.14.0",
+        "prettier": "^3.8.1",
+        "prettier-plugin-astro": "^0.14.1",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.73.0",
+        "vitest": "^5.1.1",
+        "eslint-plugin-vue": "^10.12.0",
+        "vue-eslint-parser": "^10.4.0",
+        "vue-tsc": "^3.3.0"
+    }
+}

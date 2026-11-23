@@ -1,0 +1,3 @@
+# Only the verified build output travels in the image (Dockerfile: COPY dist/ /dist/); everything else stays out of the build context.
+*
+!dist

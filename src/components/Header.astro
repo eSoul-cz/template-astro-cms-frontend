@@ -1,0 +1,36 @@
+---
+// Site header: the pages of the export as links. The desktop navigation is plain HTML; the mobile menu is the one Vue
+// island of the template (MobileMenu.vue): its links are in the server HTML too, the island only folds them behind a button.
+import { getCollection } from 'astro:content';
+
+import MobileMenu from './MobileMenu.vue';
+
+interface Props {
+    siteName: string;
+}
+
+const { siteName } = Astro.props;
+const links = (await getCollection('pages'))
+    .map((entry) => entry.data)
+    .filter((page) => !page.noindex)
+    .sort((a, b) => a.sort - b.sort || a.id - b.id)
+    .map((page) => ({ href: page.isHome ? '/' : `/${page.slug}/`, label: page.title }));
+---
+
+<header class="border-b border-line bg-bg">
+    <div class="container-site flex flex-wrap items-center justify-between gap-4 py-4">
+        <a href="/" class="font-semibold text-ink no-underline">{siteName}</a>
+        <nav aria-label="Main" class="hidden md:block">
+            <ul class="flex gap-6">
+                {
+                    links.map((link) => (
+                        <li>
+                            <a href={link.href}>{link.label}</a>
+                        </li>
+                    ))
+                }
+            </ul>
+        </nav>
+        <MobileMenu client:visible links={links} />
+    </div>
+</header>

@@ -1,0 +1,49 @@
+---
+// Every page of the export: the home page at `/`, the others at `/<slug>/`.
+import { getCollection, getEntry } from 'astro:content';
+
+import Blocks from '../components/Blocks.astro';
+import Header from '../components/Header.astro';
+import { markdownPath } from '../lib/cms/markdown';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+    const pages = await getCollection('pages');
+    return pages.map((entry) => ({
+        params: { slug: entry.data.isHome ? undefined : entry.data.slug },
+        props: { page: entry.data },
+    }));
+}
+
+const { page } = Astro.props;
+const settings = (await getEntry('settings', 'global'))!.data;
+const noindex = page.noindex ?? false;
+---
+
+<BaseLayout
+    title={page.title}
+    description={page.description ?? settings.description}
+    siteName={settings.siteName}
+    ogImage={(page.ogImage ?? settings.ogImage)?.url}
+    noindex={noindex}
+    markdownHref={noindex ? null : markdownPath(page)}
+>
+    <Header slot="header" siteName={settings.siteName} />
+    <article class="container-site flex flex-col gap-8 py-12 md:py-16">
+        <h1 class="text-4xl font-bold">{page.title}</h1>
+        <Blocks blocks={page.blocks} />
+    </article>
+    <footer slot="footer" class="border-t border-line bg-surface">
+        <div class="container-site flex flex-col gap-2 py-8 text-sm text-ink-2">
+            <p class="font-semibold text-ink">{settings.siteName}</p>
+            {settings.footerText && <p>{settings.footerText}</p>}
+            {
+                settings.contactEmail && (
+                    <p>
+                        <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a>
+                    </p>
+                )
+            }
+        </div>
+    </footer>
+</BaseLayout>

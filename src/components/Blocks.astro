@@ -1,0 +1,47 @@
+---
+// Renders the content blocks of a page. Text is escaped by Astro (the contract never carries HTML).
+import type { CmsBlock } from '../lib/cms/schema';
+
+interface Props {
+    blocks: CmsBlock[];
+}
+
+const { blocks } = Astro.props;
+const paragraphs = (body: string) =>
+    body
+        .split(/\n{2,}/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean);
+---
+
+<div class="flex flex-col gap-6">
+    {
+        blocks.map((block) => {
+            if (block.type === 'heading') {
+                return block.level === 2 ? <h2 class="text-2xl font-bold">{block.text}</h2> : <h3 class="text-xl font-semibold">{block.text}</h3>;
+            }
+            if (block.type === 'text') {
+                return (
+                    <div class="flex flex-col gap-4 text-ink-2">
+                        {paragraphs(block.body).map((paragraph) => (
+                            <p class="whitespace-pre-line">{paragraph}</p>
+                        ))}
+                    </div>
+                );
+            }
+            return (
+                <figure class="flex flex-col gap-2">
+                    <img
+                        src={block.image.url}
+                        alt={block.alt}
+                        width={block.image.width ?? undefined}
+                        height={block.image.height ?? undefined}
+                        loading="lazy"
+                        class="h-auto max-w-full rounded-md"
+                    />
+                    {block.caption && <figcaption class="text-sm text-ink-2">{block.caption}</figcaption>}
+                </figure>
+            );
+        })
+    }
+</div>

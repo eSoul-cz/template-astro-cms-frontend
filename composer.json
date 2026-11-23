@@ -1,0 +1,12 @@
+{
+    "name": "esoul-cz/template-astro-cms-frontend",
+    "description": "eSoul static Astro 7 frontend that builds from a headless CMS export (the laravel-cms backend) and ships as a FROM scratch image.",
+    "type": "project",
+    "license": "MIT",
+    "scripts": {
+        "post-create-project-cmd": [
+            "@php -r \"is_dir('.esoul') || mkdir('.esoul', 0755, true); is_file('LICENSE') && rename('LICENSE', '.esoul/template-LICENSE');\"",
+            "@composer config license proprietary"
+        ]
+    }
+}
