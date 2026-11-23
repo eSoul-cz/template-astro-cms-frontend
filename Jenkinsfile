@@ -42,8 +42,18 @@ astroPipeline(
         // version equals `@playwright/test` in package.json (the browser builds must match): change both together.
         smoke: [enabled: true, image: 'mcr.microsoft.com/playwright:v1.65.1-noble'],
     ],
-    // The golden export and the committed fixture agree (no backend needed).
-    extraChecks: [[name: 'Contract', command: 'pnpm run fixture:check']],
+    extraChecks: [
+        // The golden export and the committed fixture agree (no backend needed).
+        [name: 'Contract', command: 'pnpm run fixture:check'],
+        // The rules rendered by `esoul-guidelines` are current and unedited (README, "Guidelines"). The image of the guidelines has no PHP
+        // project around it; its entrypoint is the command itself, and the step runs `/bin/sh -c <command>`, so the entrypoint is cleared.
+        [
+            name: 'Guidelines',
+            image: 'rg.fr-par.scw.cloud/testing-images/esoul-guidelines:0.3',
+            options: '--entrypoint=',
+            command: 'esoul-guidelines check',
+        ],
+    ],
     cms: [
         callbackUrl: 'https://admin.example-project.example.com/cms-api/v1/publishes/{publishId}/status',
         credentialsId: 'example-project-cms-callback-token',

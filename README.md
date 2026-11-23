@@ -32,6 +32,36 @@ pnpm audit                     # known advisories (accepted ones are in pnpm-wor
 Run the read-only commands before every push; Jenkins runs the same ones in its `Checks` stage, on the fixture. A deploy build
 uses `CMS_SOURCE=api` and fails when the export is unreachable or invalid: it never falls back to the fixture or to old data.
 
+## Guidelines
+
+The rules in `docs/project_guidelines/` and the block in `AGENTS.md` are rendered by `esoul-guidelines` (`esoul-guidelines.json` holds the layers,
+`esoul-guidelines.lock` what was written). The project has no PHP and no Composer dependency, so `vendor/bin/esoul-guidelines` does not exist:
+install the command in one of three ways (the same code, the commands of [eSoul-cz/guidelines](https://github.com/eSoul-cz/guidelines#repositories-without-php),
+release 0.3.x). Use **Docker in CI** (the `Guidelines` stage of the `Jenkinsfile` does) and **Composer global or the PHAR on your machine**.
+
+```sh
+# 1. Composer global (PHP 8.4+ and Composer)
+composer global require esoul-cz/guidelines
+export PATH="$(composer global config bin-dir --absolute):$PATH"   # once, e.g. in ~/.zshrc
+esoul-guidelines sync        # after a new guidelines release: composer global update esoul-cz/guidelines, then sync
+esoul-guidelines check       # read-only: exit 1 on drift (a generated block was edited) or outdated content
+
+# 2. PHAR (PHP 8.4+, no Composer)
+VERSION=0.3.2                # the release without the leading "v"
+BASE="https://github.com/eSoul-cz/guidelines/releases/download/v${VERSION}"
+curl -fsSL -O "$BASE/esoul-guidelines.phar" -O "$BASE/esoul-guidelines.phar.sha256"
+sha256sum -c esoul-guidelines.phar.sha256     # macOS: shasum -a 256 -c esoul-guidelines.phar.sha256
+chmod +x esoul-guidelines.phar
+sudo mv esoul-guidelines.phar /usr/local/bin/esoul-guidelines   # or run it without installing: php esoul-guidelines.phar sync
+
+# 3. Docker (no PHP; log in first: docker login rg.fr-par.scw.cloud); the tag is one release line, a newer tag is the update
+docker run --rm -v "$PWD:/app" -w /app --user "$(id -u):$(id -g)" rg.fr-par.scw.cloud/testing-images/esoul-guidelines:0.3 sync
+docker run --rm -v "$PWD:/app" -w /app --user "$(id -u):$(id -g)" rg.fr-par.scw.cloud/testing-images/esoul-guidelines:0.3 check
+```
+
+Run `sync` after a guidelines update and commit the result (`docs/project_guidelines/`, `AGENTS.md`, `esoul-guidelines.lock`); never edit the generated
+blocks by hand. Jenkins runs `esoul-guidelines check` and fails the build on drift or outdated content.
+
 ## Configuration
 
 Values are build arguments (`.env.example` lists them); the process environment wins over `.env`.
@@ -67,7 +97,7 @@ is generated from them.
 ## Delivery
 
 `Jenkinsfile`: one call of `astroPipeline` (image mode): checks on the fixture for pull requests; on the deploy branches the real export is built once,
-verified (`pnpm verify`) and tested in the browser, then `dockerBuildMultiArch` builds the image from that exact `dist/` and `deployKomodoStack` rolls it out.
+verified (`pnpm verify`) and tested in the browser, `esoul-guidelines check` runs in its own stage (Docker image, see "Guidelines"), then `dockerBuildMultiArch` builds the image from that exact `dist/` and `deployKomodoStack` rolls it out.
 A publish from the backend starts it with `CMS_PUBLISH_ID` and the result goes back to the backend. The `Dockerfile` is `FROM scratch` + `COPY dist/ /dist/`: no
 build stage, no build argument, no token in the image build. Rollback is redeploying the previous image. NGINX (one site definition with the backend, see the
 `astro-cms` template) serves `current` and `/_cms/` media from the backend's bind-mounted directory.
