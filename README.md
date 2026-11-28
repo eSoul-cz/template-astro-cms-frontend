@@ -115,3 +115,9 @@ build stage, no build argument, no token in the image build. Rollback is redeplo
 - Preview URL: _TBD_ (HTTP basic auth in the web server; the password is a Komodo variable, never in the repository).
 - Build agent address (has to be in `CMS_API_ALLOWED_IPS` of the backend): _TBD_.
 - Deliberate deviations from the design: _none yet_.
+
+## Addons
+
+The addons this project took are listed in `.esoul/template.json`; their documentation is linked below.
+
+<!-- @esoul-slot addons -->

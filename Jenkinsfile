@@ -52,4 +52,7 @@ astroPipeline(
         credentialsId: 'example-project-cms-callback-token',
         contentHash: [file: 'node_modules/.astro/cms/source.json', path: 'export.contentHash'],
     ],
+
+    // Addons add options of the pipeline here (a slot of the template; keep this line).
+    // @esoul-slot pipeline-options
 )
